@@ -1,0 +1,38 @@
+name: Build SALEK HIGHTECH VST3
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:   # allows manual trigger
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Clone JUCE
+      run: git clone --depth 1 --branch 8.0.15 https://github.com/juce-framework/JUCE.git
+
+    - name: Configure CMake
+      run: |
+        mkdir build
+        cd build
+        cmake .. -G "Visual Studio 17 2022" -A x64 -DJUCE_DIR=../JUCE -DCMAKE_BUILD_TYPE=Release
+
+    - name: Build
+      run: |
+        cd build
+        cmake --build . --config Release
+
+    - name: Upload VST3
+      uses: actions/upload-artifact@v4
+      with:
+        name: SALEK-HIGHTECH-VST3
+        path: |
+          build/**/VST3/**
+          build/**/*.vst3/**
