@@ -1,0 +1,42 @@
+name: Build SALEK HIGHTECH VST3
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-2022
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Clone JUCE
+      run: git clone --depth 1 --branch 8.0.15 https://github.com/juce-framework/JUCE.git
+
+    - name: Setup MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Configure CMake
+      run: |
+        mkdir build
+        cd build
+        cmake .. -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DJUCE_DIR=../JUCE
+
+    - name: Build
+      run: |
+        cd build
+        cmake --build . --config Release
+
+    - name: Upload VST3
+      uses: actions/upload-artifact@v4
+      with:
+        name: SALEK-HIGHTECH-VST3
+        path: |
+          build/**/VST3/**
+          build/**/*.vst3/**
+        if-no-files-found: warn
