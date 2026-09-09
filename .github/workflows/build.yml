@@ -23,19 +23,22 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake .. -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DJUCE_DIR=../JUCE
+        cmake .. -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DJUCE_DIR=../JUCE -DCMAKE_VERBOSE_MAKEFILE=ON
 
     - name: Build
       run: |
         cd build
-        cmake --build . --config Release
+        cmake --build . --config Release --target SALEK_HIGHTECH_VST3
 
-    - name: List all built files
+    - name: Find VST3 files
       run: |
-        cd build
-        Get-ChildItem -Recurse | Select-Object FullName
+        Write-Host "===== Searching for VST3 ====="
+        Get-ChildItem -Path build -Recurse -Filter "*.vst3" | ForEach-Object { $_.FullName }
+        Get-ChildItem -Path build -Recurse -Directory | Where-Object { $_.Name -like "*VST3*" -or $_.Name -like "*artefacts*" } | ForEach-Object { $_.FullName }
+        Write-Host "===== Listing build folder ====="
+        Get-ChildItem -Path build -Recurse | Select-Object -First 80 FullName
 
-    - name: Upload everything from build
+    - name: Upload build output
       uses: actions/upload-artifact@v4
       with:
         name: SALEK-HIGHTECH-Build
