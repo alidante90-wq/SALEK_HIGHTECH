@@ -23,22 +23,26 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake .. -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DJUCE_DIR=../JUCE -DCMAKE_VERBOSE_MAKEFILE=ON
+        cmake .. -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DJUCE_DIR=../JUCE
 
-    - name: Build
+    - name: List available targets
       run: |
         cd build
-        cmake --build . --config Release --target SALEK_HIGHTECH_VST3
+        cmake --build . --target help
 
-    - name: Find VST3 files
+    - name: Build main target
       run: |
-        Write-Host "===== Searching for VST3 ====="
-        Get-ChildItem -Path build -Recurse -Filter "*.vst3" | ForEach-Object { $_.FullName }
-        Get-ChildItem -Path build -Recurse -Directory | Where-Object { $_.Name -like "*VST3*" -or $_.Name -like "*artefacts*" } | ForEach-Object { $_.FullName }
-        Write-Host "===== Listing build folder ====="
-        Get-ChildItem -Path build -Recurse | Select-Object -First 80 FullName
+        cd build
+        cmake --build . --config Release
 
-    - name: Upload build output
+    - name: Find VST3 and artefacts
+      run: |
+        Write-Host "===== Searching for VST3 / artefacts ====="
+        Get-ChildItem -Path . -Recurse -ErrorAction SilentlyContinue | Where-Object {
+          $_.Name -like "*VST3*" -or $_.Name -like "*artefacts*" -or $_.Name -like "*.vst3*" -or $_.Name -like "*SALEK*"
+        } | ForEach-Object { $_.FullName }
+
+    - name: Upload build folder
       uses: actions/upload-artifact@v4
       with:
         name: SALEK-HIGHTECH-Build
