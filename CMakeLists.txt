@@ -5,14 +5,26 @@ project(SALEK_HIGHTECH VERSION 1.0.0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Point to JUCE source (set -DJUCE_DIR=/path/to/JUCE if needed)
-set(JUCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../JUCE_CLEAN" CACHE PATH "Path to JUCE")
-if(NOT EXISTS "${JUCE_DIR}/CMakeLists.txt")
-    set(JUCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../JUCE-8.0.15" CACHE PATH "Path to JUCE" FORCE)
+# Find JUCE - priority order
+if(NOT JUCE_DIR)
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../JUCE/CMakeLists.txt")
+        set(JUCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../JUCE")
+    elseif(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../JUCE-8.0.15/CMakeLists.txt")
+        set(JUCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../JUCE-8.0.15")
+    else()
+        set(JUCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../JUCE" CACHE PATH "Path to JUCE")
+    endif()
 endif()
+
 if(NOT EXISTS "${JUCE_DIR}/CMakeLists.txt")
-    message(FATAL_ERROR "JUCE not found at ${JUCE_DIR}. Download JUCE 8.x from github.com/juce-framework/JUCE and place it next to this project or pass -DJUCE_DIR=...")
+    message(FATAL_ERROR "JUCE not found at ${JUCE_DIR}. 
+    Please clone JUCE next to this project:
+    git clone --depth 1 --branch 8.0.15 https://github.com/juce-framework/JUCE.git ../JUCE
+    
+    OR pass -DJUCE_DIR=/path/to/JUCE to cmake")
 endif()
+
+message(STATUS "JUCE found at: ${JUCE_DIR}")
 
 add_subdirectory(${JUCE_DIR} ${CMAKE_BINARY_DIR}/JUCE EXCLUDE_FROM_ALL)
 
