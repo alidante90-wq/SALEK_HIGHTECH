@@ -1,2 +1,2 @@
 #include "LookAndFeel_SALEK.h"
-// Most drawing is in the header for now.
+// LookAndFeel_SALEK implementation is header-only
